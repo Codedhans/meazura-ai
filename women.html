@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meazura | Women's Professional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-header-bg: #2d2d2d;
+            --color-text: #f0f0f0;
+            --color-subtle: #b0b0b0;
+            --color-gold: #DAA520; /* Goldenrod */
+            --color-red: #E84A5F;
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        body.light-mode {
+            --color-bg: #f5f5f5;
+            --color-surface: #ffffff;
+            --color-header-bg: #e0e0e0;
+            --color-text: #121212;
+            --color-subtle: #555555;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* --- Header --- */
+        .app-header {
+            width: 100%; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--color-surface); box-shadow: var(--shadow);
+        }
+        .logo-container img { height: 40px; cursor: pointer; }
+
+        /* --- Action Buttons --- */
+        .main-actions { padding: 20px; width: 100%; max-width: 600px; text-align: center; }
+        .btn-add-new {
+            background: var(--color-gold); color: #000; border: none;
+            padding: 15px 40px; border-radius: 8px; font-weight: bold;
+            cursor: pointer; width: 100%; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        /* --- Input Drawer (Prevents Overflow) --- */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; z-index: 1000;
+        }
+        .drawer-overlay.active { display: block; }
+        .input-drawer {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 90vh;
+            background: var(--color-surface); border-top: 4px solid var(--color-gold);
+            border-radius: 20px 20px 0 0; padding: 25px; transition: 0.4s ease;
+            overflow-y: auto; z-index: 1001;
+        }
+        .input-drawer.active { bottom: 0; }
+
+        .drawer-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .section-title { color: var(--color-gold); border-bottom: 1px solid #333; margin: 20px 0 10px; padding-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; }
+
+        /* --- Form Grid --- */
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .input-group { display: flex; flex-direction: column; }
+        .full-width { grid-column: span 2; }
+        label { font-size: 0.65rem; color: var(--color-subtle); margin-bottom: 5px; }
+        input { background: var(--color-bg); border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; }
+
+        /* --- Result Cards (Dropdown Toggle) --- */
+        .records-container { width: 100%; max-width: 600px; padding: 20px; }
+        .client-card { background: var(--color-surface); border-radius: 10px; margin-bottom: 15px; overflow: hidden; border-left: 5px solid var(--color-gold); }
+        .card-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .card-body { padding: 0 15px; max-height: 0; overflow: hidden; transition: 0.3s ease-out; background: rgba(0,0,0,0.2); }
+        .card-body.open { max-height: 1000px; padding: 15px; }
+
+        .measure-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 8px 0; font-size: 0.9rem; }
+        .measure-row span:last-child { color: var(--color-gold); font-weight: bold; }
+
+        /* --- Card Buttons --- */
+        .card-footer { display: flex; gap: 10px; margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; }
+        .btn-icon { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; color: #fff; }
+        .btn-wa { background: #25D366; }
+        .btn-edit { background: #3498db; }
+        .btn-delete { background: var(--color-red); }
+
+        /* --- Modal Alert --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal.active { display: flex; }
+        .modal-box { background: var(--color-surface); padding: 30px; border-radius: 15px; text-align: center; border: 1px solid var(--color-gold); max-width: 300px; }
+
+        @media (max-width: 400px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Logo" onclick="location.href='index.html'">
+        </div>
+        <button id="themeToggle" style="background:none; border:none; color:var(--color-text); font-size:1.2rem;">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <div class="main-actions">
+        <button class="btn-add-new" onclick="toggleDrawer(true)">
+            <i class="fas fa-venus"></i> ADD NEW MEASUREMENT
+        </button>
+    </div>
+
+    <div id="recordsList" class="records-container">
+        </div>
+
+    <div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+    <div id="inputDrawer" class="input-drawer">
+        <div class="drawer-header">
+            <h3>Women's Details</h3>
+            <button onclick="toggleDrawer(false)" style="background:none; border:none; color:var(--color-red); font-size:1.5rem;">&times;</button>
+        </div>
+        <form id="womenForm">
+            <div class="input-group full-width">
+                <label>Client Name</label>
+                <input type="text" id="clientName" placeholder="Full Name" required>
+            </div>
+
+            <div class="section-title">Upper Body</div>
+            <div class="form-grid">
+                <div class="input-group"><label>Neck</label><input type="number" step="0.1" id="neck"></div>
+                <div class="input-group"><label>Shoulder</label><input type="number" step="0.1" id="shoulder"></div>
+                <div class="input-group"><label>Bust</label><input type="number" step="0.1" id="bust"></div>
+                <div class="input-group"><label>Under Bust</label><input type="number" step="0.1" id="under_bust"></div>
+                <div class="input-group"><label>Stomach</label><input type="number" step="0.1" id="stomach"></div>
+                <div class="input-group"><label>Shirt Length</label><input type="number" step="0.1" id="shirt_length"></div>
+            </div>
+
+            <div class="section-title">Arms</div>
+            <div class="form-grid">
+                <div class="input-group"><label>Sleeve Length</label><input type="number" step="0.1" id="sleeve_length"></div>
+                <div class="input-group"><label>Bicep</label><input type="number" step="0.1" id="bicep"></div>
+                <div class="input-group"><label>Wrist</label><input type="number" step="0.1" id="wrist"></div>
+            </div>
+
+            <div class="section-title">Lower Body</div>
+            <div class="form-grid">
+                <div class="input-group"><label>Waist</label><input type="number" step="0.1" id="waist"></div>
+                <div class="input-group"><label>Hip</label><input type="number" step="0.1" id="hip"></div>
+                <div class="input-group"><label>Crotch Line</label><input type="number" step="0.1" id="crotch"></div>
+                <div class="input-group"><label>Thigh/Lap</label><input type="number" step="0.1" id="thigh"></div>
+                <div class="input-group"><label>Inseam</label><input type="number" step="0.1" id="inseam"></div>
+                <div class="input-group"><label>Outseam</label><input type="number" step="0.1" id="outseam"></div>
+                <div class="input-group full-width"><label>Skirt/Trouser Length</label><input type="number" step="0.1" id="total_length"></div>
+            </div>
+
+            <button type="submit" class="btn-add-new" style="margin-top:20px;">SAVE DATA</button>
+        </form>
+    </div>
+
+    <div id="alertModal" class="modal">
+        <div class="modal-box">
+            <i class="fas fa-check-circle" style="color:var(--color-gold); font-size:3rem; margin-bottom:15px;"></i>
+            <h3>Success!</h3>
+            <p id="alertMsg">Measurement saved locally.</p>
+            <button class="btn-add-new" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'meazura_women_records';
+        let editingId = null;
+
+        // Drawer Control
+        function toggleDrawer(show) {
+            document.getElementById('inputDrawer').classList.toggle('active', show);
+            document.getElementById('drawerOverlay').classList.toggle('active', show);
+            if(!show) { document.getElementById('womenForm').reset(); editingId = null; }
+        }
+
+        // Theme Toggle
+        document.getElementById('themeToggle').onclick = function() {
+            document.body.classList.toggle('light-mode');
+            this.querySelector('i').classList.toggle('fa-moon');
+            this.querySelector('i').classList.toggle('fa-sun');
+        };
+
+        // Save Logic
+        document.getElementById('womenForm').onsubmit = function(e) {
+            e.preventDefault();
+            const clientName = document.getElementById('clientName').value;
+            const measures = {};
+            this.querySelectorAll('input:not(#clientName)').forEach(input => {
+                measures[input.id] = input.value || "0";
+            });
+
+            let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            
+            if(editingId) {
+                records = records.map(r => r.id === editingId ? { ...r, name: clientName, data: measures } : r);
+            } else {
+                records.push({ id: Date.now(), name: clientName, data: measures, date: new Date().toLocaleDateString() });
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            document.getElementById('alertMsg').innerText = editingId ? "Record Updated" : "New Record Added";
+            document.getElementById('alertModal').classList.add('active');
+            renderRecords();
+            toggleDrawer(false);
+        };
+
+        function closeModal() { document.getElementById('alertModal').classList.remove('active'); }
+
+        // Render Cards
+        function renderRecords() {
+            const list = document.getElementById('recordsList');
+            const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            list.innerHTML = "";
+
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'client-card';
+                
+                let rows = "";
+                for(let key in record.data) {
+                    rows += `<div class="measure-row"><span>${key.replace('_',' ')}</span><span>${record.data[key]}</span></div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header" onclick="toggleCard(this)">
+                        <strong>${record.name}</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="card-body">
+                        ${rows}
+                        <div class="card-footer">
+                            <button class="btn-icon btn-wa" onclick="sendWA('${record.name}')"><i class="fab fa-whatsapp"></i> Notify</button>
+                            <button class="btn-icon btn-edit" onclick="editRecord(${record.id})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn-icon btn-delete" onclick="deleteRecord(${record.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function toggleCard(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            body.classList.toggle('open');
+            icon.style.transform = body.classList.contains('open') ? "rotate(180deg)" : "rotate(0deg)";
+        }
+
+        function deleteRecord(id) {
+            if(confirm("Delete this measurement?")) {
+                let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                renderRecords();
+            }
+        }
+
+        function editRecord(id) {
+            let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            const record = records.find(r => r.id === id);
+            if(record) {
+                editingId = id;
+                document.getElementById('clientName').value = record.name;
+                for(let key in record.data) {
+                    if(document.getElementById(key)) document.getElementById(key).value = record.data[key];
+                }
+                toggleDrawer(true);
+            }
+        }
+
+        function sendWA(name) {
+            const msg = encodeURIComponent(`Hello ${name}, your outfit from Meazura is ready for fitting!`);
+            window.open(`https://wa.me/?text=${msg}`);
+        }
+
+        // Init
+        renderRecords();
+    </script>
+</body>
+</html>
