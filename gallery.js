@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.getElementById('sendAiBtn');
     const galleryGrid = document.getElementById('galleryGrid');
     const imageUpload = document.getElementById('imageUpload');
-    const pinBtn = document.getElementById('pinBtn');
-
+    
     const STORAGE_KEY = 'meazura_gallery_styles';
     let conversationHistory = [{ role: "system", content: "You are Meazura AI, a tailoring assistant." }];
 
@@ -119,20 +118,60 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Save Pinterest/Link
-    if (pinBtn) {
-        pinBtn.onclick = () => {
-            const url = prompt("Paste Image Link:");
-            if (url) {
-                const styles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-                styles.unshift(url);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(styles));
-                renderGallery();
-            }
-        };
-    }
+
 
     // Initialize
     if (sendBtn) sendBtn.onclick = handleSendMessage;
     renderGallery();
 });
+// 1. Define the Lightbox function globally
+window.openLightbox = function(imageSrc) {
+    console.log("Opening Lightbox for:", imageSrc.substring(0, 30)); // Debug log
+    
+    // Remove existing lightbox if one exists
+    const oldLightbox = document.getElementById('active-lightbox');
+    if (oldLightbox) oldLightbox.remove();
+
+    const lightbox = document.createElement('div');
+    lightbox.id = 'active-lightbox';
+    lightbox.className = 'lightbox-overlay';
+    
+    lightbox.innerHTML = `
+        <div style="position:absolute; top:20px; right:30px; color:white; font-size:40px;">&times;</div>
+        <img src="${imageSrc}">
+    `;
+
+    // Close on click
+    lightbox.onclick = function() {
+        this.remove();
+    };
+
+    document.body.appendChild(lightbox);
+};
+
+// 2. Updated Render Function
+window.renderGallery = function() {
+    const STORAGE_KEY = 'meazura_gallery_styles';
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+
+    const styles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    
+    if (styles.length === 0) {
+        grid.innerHTML = '<p style="color:gray; text-align:center; width:100%; padding:20px;">No styles saved yet.</p>';
+        return;
+    }
+
+    // Use clean template literal
+    let html = '';
+    styles.forEach((src, index) => {
+        html += `
+            <div class="gallery-item">
+                <img src="${src}" onclick="window.openLightbox('${src}')">
+                <button class="del-img-btn" onclick="deleteStyle(${index}); event.stopPropagation();">&times;</button>
+            </div>
+        `;
+    });
+    
+    grid.innerHTML = html;
+};
