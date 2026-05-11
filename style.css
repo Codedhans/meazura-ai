@@ -588,7 +588,36 @@ main, .container, #appBody {
             }
 
 
+/* Ensure the lightbox is on the absolute top layer */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999 !important; /* Extremely high to beat all overlays */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
 
+.lightbox-overlay img {
+    max-width: 90%;
+    max-height: 80%;
+    border-radius: 10px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    pointer-events: none; /* Allows the click to pass through to the overlay to close it */
+}
+
+/* Make sure gallery items are actually interactive */
+.gallery-item img {
+    cursor: pointer;
+    pointer-events: auto !important;
+    z-index: 10;
+}
 
 
 
