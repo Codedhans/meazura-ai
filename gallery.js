@@ -100,12 +100,13 @@ sendAiBtn.onclick = async () => {
         const data = await response.json();
 */
     // Replace your fetch URL
-const response = await fetch("https://your-app-name.onrender.com/chat", {
+
+    // IN YOUR SCRIPT.JS (Frontend)
+const response = await fetch("https://meazura-ai.onrender.com/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages: conversationHistory })
 });
-    
         // This matches the "output" variable from the api/chat.js debugger
         if (data.output) {
             appendMessage('bot', data.output);
