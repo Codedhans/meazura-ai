@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const sendAiBtn = document.getElementById('sendAiBtn');
 const aiInput = document.getElementById('aiInput');
-
+/*
 if (sendAiBtn) {
     sendAiBtn.onclick = async () => {
         const query = aiInput.value.trim();
@@ -77,7 +77,37 @@ if (sendAiBtn) {
         }
     };
 }
+*/
+    // --- FIND THIS SECTION IN YOUR SCRIPT.JS ---
+sendAiBtn.onclick = async () => {
+    const query = aiInput.value.trim();
+    if (!query) return;
 
+    // 1. Show user message
+    appendMessage('user', query);
+    aiInput.value = '';
+    conversationHistory.push({ role: "user", content: query });
+
+    // 2. PASTE THE NEW FETCH LOGIC HERE:
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: conversationHistory })
+        });
+
+        const data = await response.json();
+
+        // This matches the "output" variable from the api/chat.js debugger
+        if (data.output) {
+            appendMessage('bot', data.output);
+            conversationHistory.push({ role: "assistant", content: data.output });
+        }
+    } catch (err) {
+        console.error("Connection Error:", err);
+        appendMessage('bot', "Connection lost. Check your Vercel logs.");
+    }
+};
 // Optional: Also allow sending with the 'Enter' key
 if (aiInput) {
     aiInput.onkeypress = (e) => {
