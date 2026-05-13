@@ -1,29 +1,40 @@
-import OpenAI from "openai";
-
+const OpenAI = require("openai");
 const client = new OpenAI({
     apiKey: process.env.GROQ_API_KEY,
     baseURL: "https://api.groq.com/openai/v1",
 });
 
-export default async function handler(req, res) {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
+module.exports = async (req, res) => {
+    if (req.method !== 'POST') return res.status(405).send("Method Not Allowed");
+    
     try {
-        const { messages } = req.body;
-
-        const response = await client.chat.completions.create({
+        const completion = await client.chat.completions.create({
             model: "llama-3.1-8b-instant",
-            messages: messages,
-            temperature: 0.7,
+            messages: req.body.messages, // Ensure this is an array
         });
 
-        return res.status(200).json({ 
-            output: response.choices[0].message.content 
-        });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
+        // FIX: Added [0] index to choices
+        const aiResponse = completion.choices[0].message.content;
+
+        res.status(200).json({ output: aiResponse });
+    } catch (err) {
+        console.error("Groq API Error:", err);
+        res.status(500).json({ error: err.message });
     }
+};
+
+const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: conversationHistory })
+});
+
+const data = await response.json();
+
+// Check for 'output' (which matches the serverless function above)
+if (data.output) {
+    appendMessage('bot', data.output);
+    conversationHistory.push({ role: "assistant", content: data.output });
+} else if (data.error) {
+    appendMessage('bot', "Server Error: " + data.error);
 }
