@@ -1,3 +1,17 @@
+// At the top of your server.js
+import cors from 'cors';
+
+app.use(cors({
+    origin: '*', // Allows all origins (GitHub, local, mobile)
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Add a log right inside the /chat route
+app.post('/chat', async (req, res) => {
+    console.log("Request received from mobile!"); 
+    // ... rest of your code
+});
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch'; // If using older Node, or just use global fetch in Node 18+
