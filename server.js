@@ -1,5 +1,4 @@
-// At the top of your server.js
-import cors from 'cors';
+
 
 app.use(cors({
     origin: '*', // Allows all origins (GitHub, local, mobile)
