@@ -89,6 +89,7 @@ sendAiBtn.onclick = async () => {
     conversationHistory.push({ role: "user", content: query });
 
     // 2. PASTE THE NEW FETCH LOGIC HERE:
+   /*
     try {
         const response = await fetch("/api/chat", {
             method: "POST",
@@ -97,7 +98,14 @@ sendAiBtn.onclick = async () => {
         });
 
         const data = await response.json();
-
+*/
+    // Replace your fetch URL
+const response = await fetch("https://your-app-name.onrender.com/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: conversationHistory })
+});
+    
         // This matches the "output" variable from the api/chat.js debugger
         if (data.output) {
             appendMessage('bot', data.output);
