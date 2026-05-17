@@ -315,9 +315,194 @@ window.closeAiChat = function() {
     }
     
 
+// ===== AI CHATBOT FUNCTION FOR TAILORING BUSINESS =====
 
+/**
+ * Tailoring Business AI Assistant
+ * Provides insights on fabric types, measurements, styles, and tailoring best practices
+ */
+window.TailoringAI = {
+    // Knowledge base for tailoring business
+    knowledgeBase: {
+        fabrics: {
+            cotton: "Cotton is breathable and comfortable. Best for casual shirts and daily wear. Prone to wrinkles, requires regular ironing.",
+            silk: "Silk is luxurious and smooth. Perfect for formal wear and evening attire. Delicate, requires dry cleaning.",
+            wool: "Wool is warm and durable. Ideal for suits and winter wear. Shrinks if not cared for properly.",
+            linen: "Linen is cool and breathable. Great for summer wear. Wrinkles easily but gives a relaxed look.",
+            polyester: "Polyester is durable and wrinkle-resistant. Often blended with natural fibers. Good for affordable options.",
+            "cotton-blend": "Blends combine the best of both fabrics. Easier to care for than pure natural fibers. Most popular choice."
+        },
+        styles: {
+            formal: "Formal wear requires clean lines, fitted silhouettes, and quality fabrics. Focus on chest, waist, and length measurements.",
+            casual: "Casual wear should be comfortable and relaxed. Slightly looser fit. Consider arm and shoulder measurements.",
+            business: "Business attire needs a professional look with good fit. Standard sizing based on chest and waist.",
+            traditional: "Traditional wear varies by culture. Requires specific measurements based on the garment style."
+        },
+        measurements: {
+            chest: "Measure at the fullest part of the chest. Client should wear an undershirt. Critical for proper fit.",
+            waist: "Measure at the natural waist level. Should be snug but not tight. Important for trouser and shirt fit.",
+            neck: "Measure around the base of the neck. For shirts, add 0.5 inches for comfort. Must be accurate.",
+            sleeve: "Measure from the center of the back to the wrist with arm slightly bent. Critical for shirt length.",
+            shoulder: "Measure from shoulder bone to shoulder bone across the back. Should match the client's natural width.",
+            length: "Shirt length typically hits mid-thip. Trouser breaks at shoe top.",
+            bicep: "Measure around the fullest part of the arm when relaxed. Important for sleeve fit."
+        },
+        tips: {
+            fitting: "Always have the client try on a similar garment before cutting. Take measurements with them standing straight. Use a flexible tape measure.",
+            production: "Mark all alterations clearly. Double-check measurements before cutting. Keep client communication throughout.",
+            pricing: "Factor in fabric cost, labor, and overhead. Premium fabrics cost more. Complex designs require more time.",
+            client_management: "Always keep detailed records. Take photos of finished work. Send progress updates to clients."
+        }
+    },
 
+    // Core AI function to process user queries
+    processQuery: function(userMessage) {
+        const message = userMessage.toLowerCase().trim();
+        let response = this.findBestMatch(message);
+        
+        if (!response) {
+            response = this.generateContextualResponse(message);
+        }
+        
+        return response || "I'm not sure about that. Ask me about fabrics, measurements, styles, fitting tips, or tailoring business advice!";
+    },
 
+    // Find exact or partial matches in knowledge base
+    findBestMatch: function(query) {
+        const keywords = query.split(' ');
+        
+        // Check fabrics
+        for (const [fabric, info] of Object.entries(this.knowledgeBase.fabrics)) {
+            if (keywords.includes(fabric)) {
+                return `${fabric.toUpperCase()}: ${info}`;
+            }
+        }
+        
+        // Check styles
+        for (const [style, info] of Object.entries(this.knowledgeBase.styles)) {
+            if (keywords.includes(style)) {
+                return `${style.toUpperCase()} WEAR: ${info}`;
+            }
+        }
+        
+        // Check measurements
+        for (const [measure, info] of Object.entries(this.knowledgeBase.measurements)) {
+            if (keywords.includes(measure)) {
+                return `${measure.toUpperCase()} MEASUREMENT: ${info}`;
+            }
+        }
+        
+        // Check tips
+        for (const [tip, info] of Object.entries(this.knowledgeBase.tips)) {
+            if (keywords.includes(tip)) {
+                return `${tip.toUpperCase()} TIPS: ${info}`;
+            }
+        }
+        
+        return null;
+    },
 
+    // Generate contextual responses for complex queries
+    generateContextualResponse: function(query) {
+        const responses = {
+            recommendation: [
+                "Based on measurements, ensure chest and waist are measured accurately. Then select a fabric that suits the client's needs and budget.",
+                "For a perfect fit, I recommend getting accurate shoulder, chest, waist, and length measurements before any work begins.",
+                "Choose fabric based on occasion: Cotton for casual, Wool for formal, and Silk for premium formal wear."
+            ],
+            fit: [
+                "A good fit means the garment sits comfortably without being too tight. Chest should have about 2 inches ease, waist 1 inch.",
+                "Check if sleeve length reaches the wrist naturally, shoulder seams align with actual shoulders, and the hem breaks properly at the shoe.",
+                "Always ask the client how it feels. Comfort is key for a successful tailoring job."
+            ],
+            pricing: [
+                "Calculate based on fabric cost (wholesale), labor time (hourly rate), and overhead. Add 40-60% markup for profit.",
+                "Simple alterations: $10-30. Basic tailoring: $50-150. Premium custom work: $200+. Depends on location and expertise.",
+                "Consider client budget and provide options. Sometimes fabric upgrades are worth the extra cost."
+            ],
+            care: [
+                "Cotton: Wash warm, dry medium. Silk: Dry clean only. Wool: Dry clean or hand wash gently. Always ask clients about care.",
+                "Provide care instructions with every garment. Quality fabrics deserve proper maintenance for longevity."
+            ]
+        };
+        
+        if (query.includes('recommend') || query.includes('suggest') || query.includes('should')) {
+            return this.getRandomResponse(responses.recommendation);
+        }
+        if (query.includes('fit') || query.includes('comfortable') || query.includes('perfect')) {
+            return this.getRandomResponse(responses.fit);
+        }
+        if (query.includes('price') || query.includes('cost') || query.includes('charge')) {
+            return this.getRandomResponse(responses.pricing);
+        }
+        if (query.includes('care') || query.includes('wash') || query.includes('clean')) {
+            return this.getRandomResponse(responses.care);
+        }
+        
+        return null;
+    },
 
+    // Get random response from array
+    getRandomResponse: function(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    },
 
+    // Get all available topics
+    getTopics: function() {
+        const topics = [
+            "Fabrics: " + Object.keys(this.knowledgeBase.fabrics).join(", "),
+            "Styles: " + Object.keys(this.knowledgeBase.styles).join(", "),
+            "Measurements: " + Object.keys(this.knowledgeBase.measurements).join(", "),
+            "Tips: " + Object.keys(this.knowledgeBase.tips).join(", ")
+        ];
+        return topics.join("\n");
+    }
+};
+
+// AI Chat UI Handler
+document.addEventListener('DOMContentLoaded', () => {
+    const chatMessages = document.getElementById('chatMessages');
+    const aiInput = document.getElementById('aiInput');
+    const sendAiBtn = document.getElementById('sendAiBtn');
+
+    if (!sendAiBtn || !aiInput) return;
+
+    // Send message function
+    window.sendAiMessage = function() {
+        const userText = aiInput.value.trim();
+        if (!userText) return;
+
+        // Display user message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'msg user';
+        userMsg.textContent = userText;
+        chatMessages.appendChild(userMsg);
+
+        // Get AI response
+        const aiResponse = TailoringAI.processQuery(userText);
+        
+        // Display AI response with slight delay
+        setTimeout(() => {
+            const botMsg = document.createElement('div');
+            botMsg.className = 'msg bot';
+            botMsg.textContent = aiResponse;
+            chatMessages.appendChild(botMsg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 300);
+
+        // Clear input
+        aiInput.value = '';
+        aiInput.focus();
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Send on button click
+    sendAiBtn.onclick = window.sendAiMessage;
+
+    // Send on Enter key
+    aiInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            window.sendAiMessage();
+        }
+    });
+});
